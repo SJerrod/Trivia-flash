@@ -2,32 +2,26 @@ import $ from 'jquery';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './css/styles.css';
-import './js/trivia.js';
-// import { FlashCards } from './js/trivia.js';
+// import './js/trivia-service.js';
+import FlashCards from './js/trivia-service.js';
+
+function displayQuestion(body) {
+  $('.card-text').text(`${body.results[0].question}`);
+  $('#answer1').text(`${body.results[0].incorrect_answers[2]}`);
+  $('#answer2').text(`${body.results[0].correct_answer}`);
+  $('#answer3').text(`${body.results[0].incorrect_answers[0]}`);
+  $('#answer4').text(`${body.results[0].incorrect_answers[1]}`);
+}
 
 $(document).ready(function() {
-  $('#question1').click(function(event) {
-    event.preventDefault();
-
-    let questions = new XMLHttpRequest();
-    let url = 'https://opentdb.com/api.php?amount=10&type=multiple';
-
-    questions.onreadystatechange = function(){
-      if (this.readyState === 4 && this.status === 200) {
-        const response = JSON.parse(this.responseText);
-        displayQuestion(response);
-      }
-    };
-
-    questions.open("GET", url, true);
-    questions.send();
-    
-    function displayQuestion(response) {
-      $('.card-text').text(`${response.results[0].question}`);
-      $('#answer1').text(`${response.results[0].incorrect_answers[2]}`);
-      $('#answer2').text(`${response.results[0].correct_answer}`);
-      $('#answer3').text(`${response.results[0].incorrect_answers[0]}`);
-      $('#answer4').text(`${response.results[0].incorrect_answers[1]}`);
-    }
+  $('#question1').click(function() {
+    let promise = FlashCards.getQuestion();
+    console.log(promise);
+    promise.then(function(response) {
+      const body = JSON.parse(response);
+      displayQuestion(body);
+    }, function(error) {
+      $('.card-text').text(`There was an error: ${error}`);
+    });
   });
 });
